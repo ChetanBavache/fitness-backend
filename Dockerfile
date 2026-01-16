@@ -7,11 +7,11 @@ WORKDIR /src
 # Copy everything
 COPY . .
 
-# Restore ONLY API project
-RUN dotnet restore Fitness.API/Fitness.API.csproj
+# Restore API project (correct path)
+RUN dotnet restore WebApplicationFitness/Fitness.API.csproj
 
 # Publish API
-RUN dotnet publish Fitness.API/Fitness.API.csproj -c Release -o /app/publish
+RUN dotnet publish WebApplicationFitness/Fitness.API.csproj -c Release -o /app/publish
 
 # =========================
 # Runtime stage
