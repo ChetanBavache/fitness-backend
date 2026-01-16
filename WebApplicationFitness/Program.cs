@@ -30,8 +30,6 @@ builder.Services.AddSwaggerGen();
 
 
 
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -42,14 +40,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
 
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
+            ValidIssuer = "Fitness.API",
+            ValidAudience = "Fitness.Client",
 
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings["Key"]!)
+                Encoding.UTF8.GetBytes("THIS_IS_A_SUPER_SECRET_KEY_12345")
             )
         };
     });
+
 
 
 var app = builder.Build();
