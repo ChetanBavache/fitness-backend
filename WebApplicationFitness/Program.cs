@@ -63,7 +63,7 @@ app.UseSwaggerUI(c =>
 
 // Middleware pipeline
 app.UseHttpsRedirection();
-app.UseMiddleware<ExceptionMiddleware>();
+//app.UseMiddleware<ExceptionMiddleware>();
 
 if (jwtEnabled)
 {
