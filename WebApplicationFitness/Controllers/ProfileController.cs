@@ -8,7 +8,7 @@ namespace Fitness.API.Controllers;
 [Route("api/[controller]")]
 public class ProfileController : ControllerBase
 {
-    [Authorize]
+    //[Authorize]
     [HttpGet]
     public IActionResult GetProfile()
     {
