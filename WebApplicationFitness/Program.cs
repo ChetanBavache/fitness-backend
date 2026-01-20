@@ -22,11 +22,18 @@ builder.Services.AddDbContext<FitnessDbContext>(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// Swagger
+// ✅ Swagger (FIXED)
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new()
+    {
+        Title = "Fitness API",
+        Version = "v1"
+    });
+});
 
-// JWT (SAFE)
+// JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 bool jwtEnabled = !string.IsNullOrWhiteSpace(jwtSettings["Key"]);
 
@@ -54,16 +61,16 @@ if (jwtEnabled)
 
 var app = builder.Build();
 
-// Swagger FIRST
+// ✅ Swagger middleware
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Fitness API v1");
 });
 
-// Middleware pipeline
+// Pipeline
 app.UseHttpsRedirection();
-//app.UseMiddleware<ExceptionMiddleware>();
+// app.UseMiddleware<ExceptionMiddleware>();
 
 if (jwtEnabled)
 {
