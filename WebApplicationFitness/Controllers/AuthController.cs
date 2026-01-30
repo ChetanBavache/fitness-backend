@@ -18,15 +18,12 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterUserRequest request)
     {
-        var result = await _userService.RegisterAsync(request);
-        return Ok(result);
+        return Ok(await _userService.RegisterAsync(request));
     }
 
-    // ✅ LOGIN ENDPOINT
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        var result = await _userService.LoginAsync(request);
-        return Ok(result);
+        return Ok(await _userService.LoginAsync(request));
     }
 }

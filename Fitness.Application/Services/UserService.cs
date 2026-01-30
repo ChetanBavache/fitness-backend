@@ -2,6 +2,7 @@
 using Fitness.Application.Interfaces;
 using Fitness.Domain.Entities;
 using Fitness.Domain.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -12,10 +13,14 @@ namespace Fitness.Application.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IConfiguration _configuration;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(
+        IUserRepository userRepository,
+        IConfiguration configuration)
     {
         _userRepository = userRepository;
+        _configuration = configuration;
     }
 
     // ✅ REGISTER
@@ -51,41 +56,37 @@ public class UserService : IUserService
         if (user == null)
             throw new Exception("Invalid credentials");
 
-        var isValidPassword = BCrypt.Net.BCrypt.Verify(
-            request.Password,
-            user.PasswordHash
-        );
-
-        if (!isValidPassword)
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             throw new Exception("Invalid credentials");
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim("fullName", user.FullName)
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.FullName)
         };
 
+        var jwtSection = _configuration.GetSection("Jwt");
+
         var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes("THIS_IS_A_SUPER_SECRET_KEY_12345")
+            Encoding.UTF8.GetBytes(jwtSection["Key"]!)
         );
 
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var expires = DateTime.UtcNow.AddHours(2);
-
         var token = new JwtSecurityToken(
-            issuer: "Fitness.API",
-            audience: "Fitness.Client",
+            issuer: jwtSection["Issuer"],
+            audience: jwtSection["Audience"],
             claims: claims,
-            expires: expires,
-            signingCredentials: creds
+            expires: DateTime.UtcNow.AddHours(2),
+            signingCredentials: new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256
+            )
         );
 
         return new LoginResponse
         {
             Token = new JwtSecurityTokenHandler().WriteToken(token),
-            ExpiresAt = expires
+            ExpiresAt = token.ValidTo
         };
     }
 }
