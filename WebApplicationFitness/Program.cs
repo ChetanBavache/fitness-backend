@@ -17,16 +17,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // ✅ Ensure SQLite folder exists
+// ✅ SQLite path for local + Render container
 var dbFolder = Path.Combine(AppContext.BaseDirectory, "data");
 Directory.CreateDirectory(dbFolder);
 
-var dbPath = Path.Combine(
-    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-    "fitness",
-    "fitness.db"
+var dbPath = Path.Combine(dbFolder, "fitness.db");
+
+builder.Services.AddDbContext<FitnessDbContext>(options =>
+    options.UseSqlite($"Data Source={dbPath}")
 );
 
-Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 
 builder.Services.AddDbContext<FitnessDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}")
